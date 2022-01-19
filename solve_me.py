@@ -63,11 +63,15 @@ $ python tasks.py report # Statistics"""
         )
 
     def add(self, args):
-        priority = args[0];
-        taskString = args[1];
+        priority = args[0]
+        taskString = args[1]
         #check duplication
         if priority in self.current_items.keys():
-            return
+            new_priority = str(int(priority)+1)
+            temp = self.current_items[priority]
+            self.current_items[priority] = taskString
+            self.current_items[new_priority] = temp
+            pass
         self.current_items[priority] = taskString
         self.write_current()
         print("Added task: \""+taskString+"\" with priority "+priority);
@@ -77,10 +81,12 @@ $ python tasks.py report # Statistics"""
         #check task existance
         if(priority in self.current_items):
             #check if already completed by checking completed list
-            if(priority not in self.completed_items):
-                self.completed_items.append(priority)
+            if(self.current_items[priority] not in self.completed_items):
+                self.completed_items.append(self.current_items[priority])
                 self.write_completed()
-                print("Marked item as done")
+                print("Marked item as done.")
+            else:
+                pass
         else:
             print("Error: no incomplete item with priority "+ priority +" exists.")
 
@@ -88,10 +94,12 @@ $ python tasks.py report # Statistics"""
         priority = args[0]
         #check task existence
         if(priority in self.current_items.keys()):
-            self.current_items.pop(priority)
             #check completed list for existence
             if(priority in self.completed_items):
-                self.completed_items.remove(priority)
+                self.completed_items.remove(self.current_items[priority])
+                self.current_items.pop(priority)
+            else:
+                self.current_items.pop(priority)
             self.write_completed()
             self.write_current()
             print("Deleted item with priority "+priority)
@@ -99,21 +107,26 @@ $ python tasks.py report # Statistics"""
             print("Error: item with priority "+ priority +" does not exist. Nothing deleted.")
 
     def ls(self):
-        for index, (priority, taskString) in enumerate(self.current_items.items()):
-            print(str(index+1)+". "+taskString+ " ["+priority+"]")
+        index = 1
+        for (priority, taskString) in self.current_items.items():
+            if(taskString not in self.completed_items):
+                print(str(index)+". "+taskString+ " ["+priority+"]")
+                index+=1
+
 
 
     def report(self):
         COMPLETED_TASKS_COUNT = len(self.completed_items)
         PENDING_TASKS_COUNT = len(self.current_items) - COMPLETED_TASKS_COUNT
         #print pending
+        index = 1
         print("Pending : "+str(PENDING_TASKS_COUNT))
-        for index, (priority, taskString) in enumerate(self.current_items.items()):
-            if(priority not in self.completed_items):
-                print(str(index+1)+". "+taskString+ " ["+priority+"]")
+        for priority, taskString in self.current_items.items():
+            if(taskString not in self.completed_items):
+                print(str(index)+". "+taskString+ " ["+priority+"]")
+                index+=1
         #print completed
+        print()
         print("Completed : "+str(COMPLETED_TASKS_COUNT))
-        for index, (priority, taskString) in enumerate(self.current_items.items()):
-            if(priority in self.completed_items):
-                print(str(index+1)+". "+taskString)
-        pass
+        for i, completed_item in enumerate(self.completed_items):
+            print(str(i+1)+". "+completed_item)
