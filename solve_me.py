@@ -63,16 +63,57 @@ $ python tasks.py report # Statistics"""
         )
 
     def add(self, args):
-        pass
+        priority = args[0];
+        taskString = args[1];
+        #check duplication
+        if priority in self.current_items.keys():
+            return
+        self.current_items[priority] = taskString
+        self.write_current()
+        print("Added task: \""+taskString+"\" with priority "+priority);
 
     def done(self, args):
-        pass
+        priority = args[0];
+        #check task existance
+        if(priority in self.current_items):
+            #check if already completed by checking completed list
+            if(priority not in self.completed_items):
+                self.completed_items.append(priority)
+                self.write_completed()
+                print("Marked item as done")
+        else:
+            print("Error: no incomplete item with priority "+ priority +" exists.")
 
     def delete(self, args):
-        pass
+        priority = args[0]
+        #check task existence
+        if(priority in self.current_items.keys()):
+            self.current_items.pop(priority)
+            #check completed list for existence
+            if(priority in self.completed_items):
+                self.completed_items.remove(priority)
+            self.write_completed()
+            self.write_current()
+            print("Deleted item with priority "+priority)
+        else:
+            print("Error: item with priority "+ priority +" does not exist. Nothing deleted.")
 
     def ls(self):
-        pass
+        for index, (priority, taskString) in enumerate(self.current_items.items()):
+            print(str(index+1)+". "+taskString+ " ["+priority+"]")
+
 
     def report(self):
+        COMPLETED_TASKS_COUNT = len(self.completed_items)
+        PENDING_TASKS_COUNT = len(self.current_items) - COMPLETED_TASKS_COUNT
+        #print pending
+        print("Pending : "+str(PENDING_TASKS_COUNT))
+        for index, (priority, taskString) in enumerate(self.current_items.items()):
+            if(priority not in self.completed_items):
+                print(str(index+1)+". "+taskString+ " ["+priority+"]")
+        #print completed
+        print("Completed : "+str(COMPLETED_TASKS_COUNT))
+        for index, (priority, taskString) in enumerate(self.current_items.items()):
+            if(priority in self.completed_items):
+                print(str(index+1)+". "+taskString)
         pass
